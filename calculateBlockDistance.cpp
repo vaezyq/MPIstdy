@@ -1,13 +1,9 @@
 //
-// Created by 22126 on 2021/10/13.
-//
-
-//
 // Created by 22126 on 2021/10/12.
 //
 
 
-
+#pragma comment(lib, "D:\\MPI\\Lib\\x86\\msmpi.lib")
 
 #include <iostream>
 #include "graphMatrix.h"
@@ -15,80 +11,13 @@
 #include "basicDistance.h"
 #include "crossUpdate.h"
 #include "elseBlockUpdate.h"
-
-
 #include <chrono>
 
 #include <omp.h>
 
 using namespace std::chrono;
 
-
-void calculateBlockDistance(int **mat, int &len, int &block_len);
-
-
-int main() {
-
-
-    int len = 30;
-    int block_len = 6;
-
-    graphMatrix gm(len);
-    int (**mat);
-
-    mat = (int **) malloc(len * sizeof(int *));
-    for (int i = 0; i < len; i++) {
-        mat[i] = (int *) malloc(len * sizeof(int));
-    }
-    mat = gm.getArray();
-
-
-    auto start = high_resolution_clock::now();
-    calculateBlockDistance(mat, len, block_len);
-
-
-//    for (int i = 0; i < len; ++i) {
-//        for (int j = 0; j < len; ++j) {
-//            cout << mat[i][j] << "  ";
-//        }
-//        cout << endl;
-//    }
-
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<nanoseconds>(stop - start);
-    cout << duration.count() << endl;
-
-
-    auto start1 = high_resolution_clock::now();
-
-
-
-    cout << len << endl;
-
-
-    for (int k = 0; k < 0 + len; ++k) {
-        for (int i = 0; i < 0 + len; ++i) {
-            for (int j = 0; j < 0 + len; ++j) {
-                mat[i][j] = (mat[i][j] > (mat[i][k] + mat[k][j])) ? (mat[i][k] + mat[k][j]) : mat[i][j];
-            }
-        }
-    }
-
-    cout << "***************" << endl;
-
-
-    auto stop1 = high_resolution_clock::now();
-    auto duration1 = duration_cast<nanoseconds>(stop1 - start1);
-    cout << duration1.count() << endl;
-
-
-    return 0;
-
-
-}
-
-
-void calculateBlockDistance(int **mat, int &len, int &block_len) {
+void calculateBlockDistanceOne(int **mat, int &len, int &block_len) {
 
 
     for (int k = 0; k < len / block_len; ++k) {

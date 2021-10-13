@@ -4,6 +4,7 @@
 
 #include "graphMatrix.h"
 #include <iostream>
+#include <ctime>
 
 graphMatrix::graphMatrix(int len) {
     this->length = len;
@@ -26,12 +27,18 @@ graphMatrix::graphMatrix(int len) {
             a[i][j] = rand() % 20;
         }
     }
+
+
     for (int i = 0; i < length; ++i) {
         for (int j = 0; j < length; ++j) {
             array[i][j] = (a[i][j] + a[j][i]) / 2;
         }
     }
 
+
+    for (int i = 0; i < length; ++i) {
+        array[i][i] = 0;
+    }
 
 }
 
