@@ -24,14 +24,18 @@
 using namespace std::chrono;
 
 
+void calculateBlockDistanceParallel(int **mat, int &len, int &block_len);
+
 void calculateBlockDistance(int **mat, int &len, int &block_len);
+
+void calculateBlockDistancePara(int **mat, int &len, int &block_len);
 
 
 int main() {
 
 
-    int len = 30;
-    int block_len = 6;
+    int len = 1000;
+    int block_len = 10;
 
     graphMatrix gm(len);
     int (**mat);
@@ -43,9 +47,95 @@ int main() {
     mat = gm.getArray();
 
 
-    auto start = high_resolution_clock::now();
-    calculateBlockDistance(mat, len, block_len);
+    int (**mat1);
 
+    mat1 = (int **) malloc(len * sizeof(int *));
+    for (int i = 0; i < len; i++) {
+        mat1[i] = (int *) malloc(len * sizeof(int));
+    }
+
+
+    int (**mat2);
+
+    mat2 = (int **) malloc(len * sizeof(int *));
+    for (int i = 0; i < len; i++) {
+        mat2[i] = (int *) malloc(len * sizeof(int));
+    }
+
+    for (int i = 0; i < len; ++i) {
+        for (int j = 0; j < len; ++j) {
+            mat2[i][j] = mat1[i][j] = mat[i][j];
+        }
+    }
+
+
+    auto start = high_resolution_clock::now();
+    calculateBlockDistance(mat2, len, block_len);
+
+
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<nanoseconds>(stop - start);
+    cout << "·Ç²¢ÐÐ¿éËã·¨ÔËÐÐËùÐèµÄÊ±¼ä" << endl;
+    cout << duration.count() << endl;
+
+
+//    cout << endl;
+//    for (int i = 0; i < len; ++i) {
+//        for (int j = 0; j < len; ++j) {
+//            cout << mat2[i][j] << " ";
+//        }
+//        cout << endl;
+//    }
+
+
+    cout << "************" << endl;
+
+
+    auto start2 = high_resolution_clock::now();
+    calculateBlockDistancePara(mat1, len, block_len);
+
+
+    auto stop2 = high_resolution_clock::now();
+    auto duration2 = duration_cast<nanoseconds>(stop2 - start2);
+    cout << "²¢ÐÐ¿éËã·¨ÔËÐÐËùÐèµÄÊ±¼ä" << endl;
+    cout << duration2.count() << endl;
+
+//    cout << endl;
+//    for (int i = 0; i < len; ++i) {
+//        for (int j = 0; j < len; ++j) {
+//            cout << mat1[i][j] << " ";
+//        }
+//        cout << endl;
+//    }
+
+    cout << "************" << endl;
+
+
+    auto start1 = high_resolution_clock::now();
+
+
+    for (int k = 0; k < len; ++k) {
+        for (int i = 0; i < len; ++i) {
+            for (int j = 0; j < len; ++j) {
+                mat[i][j] = (mat[i][j] > (mat[i][k] + mat[k][j])) ? (mat[i][k] + mat[k][j]) : mat[i][j];
+            }
+        }
+    }
+
+
+    auto stop1 = high_resolution_clock::now();
+    auto duration1 = duration_cast<nanoseconds>(stop1 - start1);
+    cout << "Ô­floydËã·¨ÔËÐÐ¼ÆËãËùÐèµÄÊ±¼ä" << endl;
+    cout << duration1.count() << endl;
+
+
+//    cout << endl;
+//    for (int i = 0; i < len; ++i) {
+//        for (int j = 0; j < len; ++j) {
+//            cout << mat[i][j] << " ";
+//        }
+//        cout << endl;
+//    }
 
 //    for (int i = 0; i < len; ++i) {
 //        for (int j = 0; j < len; ++j) {
@@ -53,34 +143,6 @@ int main() {
 //        }
 //        cout << endl;
 //    }
-
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<nanoseconds>(stop - start);
-    cout << duration.count() << endl;
-
-
-    auto start1 = high_resolution_clock::now();
-
-
-
-    cout << len << endl;
-
-
-    for (int k = 0; k < 0 + len; ++k) {
-        for (int i = 0; i < 0 + len; ++i) {
-            for (int j = 0; j < 0 + len; ++j) {
-                mat[i][j] = (mat[i][j] > (mat[i][k] + mat[k][j])) ? (mat[i][k] + mat[k][j]) : mat[i][j];
-            }
-        }
-    }
-
-    cout << "***************" << endl;
-
-
-    auto stop1 = high_resolution_clock::now();
-    auto duration1 = duration_cast<nanoseconds>(stop1 - start1);
-    cout << duration1.count() << endl;
-
 
     return 0;
 
@@ -93,108 +155,94 @@ void calculateBlockDistance(int **mat, int &len, int &block_len) {
 
     for (int k = 0; k < len / block_len; ++k) {
 
-
-//            æ¯ä¸€æ­¥ä¹‹é—´æ˜¯ä¸å¯ä»¥å¹¶è¡Œçš„ï¼Œä½†æ˜¯æ¯ä¸€æ­¥å¯ä»¥åˆ†ä¸‰ä¸ªå°æ“ä½œï¼Œæ“ä½œ2ã€3å¯ä»¥å¹¶è¡Œ
-
+//            Ã¿Ò»²½Ö®¼äÊÇ²»¿ÉÒÔ²¢ÐÐµÄ£¬µ«ÊÇÃ¿Ò»²½¿ÉÒÔ·ÖÈý¸öÐ¡²Ù×÷£¬²Ù×÷2¡¢3¿ÉÒÔ²¢ÐÐ
 
         basicDistance bc(block_len * k, block_len);
-        //ç¬¬ä¸€æ­¥ è®¡ç®—å¯¹è§’çº¿åŒºåŸŸçš„disï¼Œä¸å¯å¹¶è¡Œ
-        mat = bc.calculate(mat);
+        //µÚÒ»²½ ¼ÆËã¶Ô½ÇÏßÇøÓòµÄdis£¬²»¿É²¢ÐÐ
+        bc.calculate(mat);
 
-        //ç¬¬äºŒæ­¥ è®¡ç®—åå­—æž¶ä¸ŠåŒºåŸŸçš„dis(å¯å¹¶è¡Œblock_len-1ä¸ªçº¿ç¨‹)
-
+        //µÚ¶þ²½ ¼ÆËãÊ®×Ö¼ÜÉÏÇøÓòµÄdis(¿É²¢ÐÐblock_len-1¸öÏß³Ì)
 
         for (int i = 0; i < len / block_len; ++i) {
             if (i == k) {
                 continue;
             }
-
-
-#pragma omp parallel   num_threads(len / block_len)
-            {
-                if (omp_get_thread_num() == i) {
-
-//            åå­—æž¶æ¨ªå‘çš„æ›´æ–°
-                    crossUpdate cs_row(block_len * k, i * block_len, block_len, k * block_len);
-
-#pragma omp critical
-                    {
-                        mat = cs_row.calculateCrossBlock(mat);
-                    };
-
-//            åå­—æž¶ç«–å‘çš„æ›´æ–°
-                    crossUpdate cs_col(i * block_len, block_len * k, block_len, k * block_len);
-
-#pragma omp critical
-                    {
-                        mat = cs_col.calculateCrossBlock(mat);
-                    };
-                }
-
-            };
-
-
-            //            ç¬¬ä¸‰æ­¥ å‰©ä½™åŒºåŸŸçš„æ›´æ–°
-
-            int N = (len / block_len) * (len / block_len);
-            for (int i = 0; i < len / block_len; ++i) {
-
-//#pragma omp parallel  num_threads(len / block_len)
-                {
-//                    if (omp_get_thread_num() == i) {
-                    for (int j = 0; j < len / block_len; ++j) {
-#pragma omp parallel  num_threads(N)
-                        {
-                            for (int m = 0; m < N; ++m) {
-                                if (omp_get_thread_num() == k) {
-                                    if (i != k || j != k) {
-                                        elseBlockUpdate ebu(i * block_len, j * block_len, block_len, k * block_len);
-#pragma omp critical
-                                        {
-                                            mat = ebu.calcuateElseBlock(mat);
-                                        };
-
-                                    }
-                                }
-                            }
-
-//                                if (omp_get_thread_num() == j) {
-
-//                            }
-//                                };
-                        }
-//                        };
-                    }
-                }
-
-            }
-
+//            Ê®×Ö¼ÜºáÏòµÄ¸üÐÂ
+            crossUpdate cs_row(block_len * k, i * block_len, block_len, k * block_len);
+            cs_row.calculateCrossBlock(mat);
 
         }
+
+        //            µÚÈý²½ Ê£ÓàÇøÓòµÄ¸üÐÂ
+
+        for (int i = 0; i < len / block_len; ++i) {
+            for (int j = 0; j < len / block_len; ++j) {
+                if (i != k || j != k) {
+                    elseBlockUpdate ebu(i * block_len, j * block_len, block_len, k * block_len);
+                    ebu.calcuateElseBlock(mat);
+                }
+            }
+        }
+
     }
 
 
+}
 
 
+void calculateBlockDistancePara(int **mat, int &len, int &block_len) {
 
-//    for (int i = 0; i < len; ++i) {
-//        for (int j = 0; j < len; ++j) {
-//            cout << mat[i][j] << "  ";
+
+    for (int k = 0; k < len / block_len; ++k) {
+
+//            Ã¿Ò»²½Ö®¼äÊÇ²»¿ÉÒÔ²¢ÐÐµÄ£¬µ«ÊÇÃ¿Ò»²½¿ÉÒÔ·ÖÈý¸öÐ¡²Ù×÷£¬²Ù×÷2¡¢3¿ÉÒÔ²¢ÐÐ
+
+        basicDistance bc(block_len * k, block_len);
+        //µÚÒ»²½ ¼ÆËã¶Ô½ÇÏßÇøÓòµÄdis£¬²»¿É²¢ÐÐ
+        bc.calculate(mat);
+
+        //µÚ¶þ²½ ¼ÆËãÊ®×Ö¼ÜÉÏÇøÓòµÄdis(¿É²¢ÐÐblock_len-1¸öÏß³Ì)
+
+
+#pragma omp parallel for num_threads(10) default(none) shared(len, block_len, k, mat)
+        for (int i = 0; i < len / block_len; ++i) {
+            if (i == k) {
+                continue;
+            }
+//            Ê®×Ö¼ÜºáÏòµÄ¸üÐÂ
+            crossUpdate cs_row(block_len * k, i * block_len, block_len, k * block_len);
+            cs_row.calculateCrossBlock(mat);
+
+        }
+
+
+        //            µÚÈý²½ Ê£ÓàÇøÓòµÄ¸üÐÂ
+//#pragma omp parallel for num_threads(20) default(none) shared(len, block_len, k, mat)
+//        for (int i = 0; i < len / block_len; ++i) {
+//#pragma omp parallel for num_threads(20) default(none) shared(len, block_len, k, mat, i)
+//            for (int j = 0; j < len / block_len; ++j) {
+//                if (i != k || j != k) {
+//                    elseBlockUpdate ebu(i * block_len, j * block_len, block_len, k * block_len);
+//                    ebu.calcuateElseBlock(mat);
+//                }
+//            }
 //        }
-//        cout << endl;
-//    }
 
 
+        int base = (len / block_len) * (len / block_len);
+        int len_one = (len / block_len);
+#pragma omp parallel for num_threads(10) default(none) shared(base, len_one, block_len, mat, k)
+        for (int baseline = 0; baseline < base; ++baseline) {
+            int i = baseline / (len_one);
+            int j = baseline % len_one;
+            if (i != k || j != k) {
+                elseBlockUpdate ebu(i * block_len, j * block_len, block_len, k * block_len);
+                ebu.calcuateElseBlock(mat);
+            }
+        }
 
 
-//    for (int i = 0; i < len; ++i) {
-//        for (int j = 0; j < len; ++j) {
-//            cout << mat[i][j] << "  ";
-//        }
-//        cout << endl;
-//    }
-
-    cout << "***************" << endl;
+    }
 
 
 }

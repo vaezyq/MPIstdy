@@ -8,7 +8,7 @@ crossUpdate::crossUpdate(int rowIndex, int colIndex, int len, int blockIndex) : 
                                                                                 col_index(colIndex), len(len),
                                                                                 blockIndex(blockIndex) {}
 
-int **crossUpdate::calculateCrossBlock(int **array) {
+void crossUpdate::calculateCrossBlock(int **array) {
 //更新右边的区域
     for (int i = row_index; i < row_index + len; ++i) {
         for (int j = col_index; j < col_index + len; ++j) {
@@ -25,7 +25,6 @@ int **crossUpdate::calculateCrossBlock(int **array) {
         }
     }
 
-    return array;
 }
 
 

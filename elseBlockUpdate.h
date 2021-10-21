@@ -16,7 +16,7 @@ private:
 public:
     elseBlockUpdate(int colIndex, int rowIndex, int len, int kIndex);
 
-    int **calcuateElseBlock(int **array);
+    void calcuateElseBlock(int **array);
 
 
 };
